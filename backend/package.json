@@ -1,0 +1,14 @@
+{
+  "name": "cazador-de-asteroides-backend",
+  "version": "1.0.0",
+  "description": "API REST del Cazador de Asteroides con Node.js puro y SQLite integrado (sin dependencias externas).",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=22.13.0"
+  }
+}

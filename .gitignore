@@ -1,0 +1,25 @@
+# Dependencias
+node_modules/
+
+# Node portable descargado en la raiz del proyecto
+node-v24.21.0-win-x64/
+
+# Entorno y secretos
+.env
+
+# Builds
+dist/
+build/
+
+# Base de datos local (SQLite)
+backend/data/*.db
+backend/data/*.db-journal
+backend/data/*.db-wal
+backend/data/*.db-shm
+
+# Logs y archivos temporales
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+*.tmp
