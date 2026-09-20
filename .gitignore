@@ -23,3 +23,7 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 *.tmp
+
+# Node portatil empaquetado y PID del servidor
+tools/
+backend/server.pid

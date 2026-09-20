@@ -25,6 +25,18 @@ Combinación de un **videojuego de naves (Asteroids)** con un **contador de foto
 - **Node.js 22.13 o superior** (incluye el módulo integrado `node:sqlite`). No se requieren dependencias externas ni npm install.
 - Un navegador moderno (Chrome, Edge, Firefox).
 
+## Cómo jugar en un solo clic (recomendado)
+
+No hace falta escribir comandos:
+
+1. **Doble clic en `ComenzarPartida.cmd`** (raíz del proyecto). El iniciador:
+   - Busca Node.js automáticamente (instalado en el sistema, o en rutas comunes).
+   - Levanta el servidor en segundo plano (`node server.js`).
+   - Espera a que esté listo y abre el navegador en **http://localhost:3000**.
+2. Juega. Cuando termines, **doble clic en `DetenerPartida.cmd`** para apagar el servidor.
+
+Si no hay Node.js en el equipo, el iniciador lo avisa y muestra cómo instalarlo (https://nodejs.org).
+
 ## Instalación y ejecución
 
 1. Descargar y descomprimir el proyecto (o clonar el repositorio).
@@ -42,7 +54,7 @@ Combinación de un **videojuego de naves (Asteroids)** con un **contador de foto
 
 El servidor entrega el **frontend** y la **API** juntos. La base de datos SQLite se crea automáticamente en `backend/data/scores.db` (ignorada por Git).
 
-> Si tu equipo descargó Node como ZIP, extrae el contenido **fuera de OneDrive** (por ejemplo `C:\node`) y usa `node.exe` desde ahí o agrégalo al PATH.
+> Si tu equipo descargó Node como ZIP, extrae el contenido **fuera de OneDrive** (por ejemplo `C:\node`) y agrégalo al PATH: el iniciador lo encontrará automáticamente.
 
 ## Configuración (variables de entorno)
 
