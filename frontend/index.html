@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cazador de Asteroides — Telemetría de FPS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="src/css/base.css" />
+  <link rel="stylesheet" href="src/css/layout.css" />
+  <link rel="stylesheet" href="src/css/hud.css" />
+  <link rel="stylesheet" href="src/css/overlays.css" />
+  <link rel="stylesheet" href="src/css/controls.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="page-header">
+      <div>
+        <h1>Cazador de Asteroides</h1>
+        <p>Videojuego con física vectorial y telemetría propia de fotogramas y colisiones.</p>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel scene-panel">
+        <canvas id="game-canvas" width="620" height="460"></canvas>
+
+        <div id="fps-badge" class="fps-badge">
+          <span>FPS</span>
+          <span id="fps-badge-value" class="fps-badge-value">0</span>
+        </div>
+
+        <div class="hud-top">
+          <div>PUNTAJE</div>
+          <div id="hud-score" class="hud-score">0</div>
+          <div>VIDAS <span id="hud-lives">3</span></div>
+          <div>OLEADA <span id="hud-wave">1</span></div>
+        </div>
+
+        <div id="scene-menu" class="overlay">
+          <h2>Menú principal</h2>
+          <label class="field">
+            <span>Nombre del piloto</span>
+            <input id="player-name" type="text" maxlength="16" placeholder="Jugador" />
+          </label>
+          <button id="btn-start" class="accent">Comenzar partida</button>
+        </div>
+
+        <div id="scene-pause" class="overlay hidden">
+          <h2>Pausa</h2>
+          <p>Pulsa P para continuar la partida.</p>
+        </div>
+
+        <div id="scene-game-over" class="overlay hidden">
+          <h2>Nave destruida</h2>
+          <p id="game-over-summary"></p>
+          <button id="btn-retry" class="accent">Jugar de nuevo</button>
+        </div>
+
+        <div id="touch-controls" class="touch-controls">
+          <div class="touch-group">
+            <button id="btn-touch-left" class="touch-btn" aria-label="Girar a la izquierda">&#9664;</button>
+            <button id="btn-touch-right" class="touch-btn" aria-label="Girar a la derecha">&#9654;</button>
+          </div>
+          <div class="touch-group">
+            <button id="btn-touch-thrust" class="touch-btn" aria-label="Acelerar">&#9650;</button>
+            <button id="btn-touch-fire" class="touch-btn fire" aria-label="Disparar">&#9679;</button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel telemetry-panel">
+        <h2>Telemetría de fotogramas</h2>
+        <div class="telemetry-list">
+          <div>Estado <span id="fps-state" class="is-off">ESPERA</span></div>
+          <div>FPS actual <span id="fps-current">0</span></div>
+          <div>Promedio <span id="fps-average">0</span></div>
+          <div>Mínimo <span id="fps-min">-</span></div>
+          <div>Máximo <span id="fps-max">-</span></div>
+          <div>Cuadros <span id="fps-frames">0</span></div>
+          <div>T. de cuadro <span id="fps-frame-time">0.0</span> ms</div>
+          <div>Colisiones/frame <span id="fps-collisions">0</span></div>
+          <div>Entidades <span id="fps-entities">0</span></div>
+        </div>
+        <canvas id="fps-graph" width="240" height="80"></canvas>
+
+        <div class="leaderboard">
+          <h2>Mejores pilotos</h2>
+          <ol id="leaderboard-list"></ol>
+        </div>
+
+        <div class="key-hints">
+          <div><span class="key">&#8593;</span><span class="key">W</span> Acelerar</div>
+          <div><span class="key">&#8592;</span><span class="key">&#8594;</span><span class="key">A</span><span class="key">D</span> Rotar</div>
+          <div><span class="key">Espacio</span> Disparar</div>
+          <div><span class="key">P</span> Pausa</div>
+          <div class="api-state">API: <span id="api-state" class="is-off">comprobando</span></div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script type="module" src="src/js/main.js"></script>
+</body>
+</html>
