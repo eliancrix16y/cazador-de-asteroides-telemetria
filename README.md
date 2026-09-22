@@ -116,6 +116,10 @@ proyecto combinado/
 │       │   ├── services/       # Cliente de API y leaderboard
 │       │   └── utils/          # Vec2, matemáticas, DOM
 │       └── assets/             # Imágenes, sonidos y fuentes
+├── documentacion/
+│   ├── capturas/               # Capturas de la aplicación
+│   ├── documento-tecnico.md
+│   └── guion-video.md
 └── Requerimientos_Mini_Proyecto_RA1.pdf
 ```
 
@@ -145,12 +149,13 @@ La validación de entrada exige nombre de 1 a 16 caracteres, `score`/`waveReache
 
 ## Capturas de pantalla
 
-- Menú principal con selección de modalidades: `frontend/screenshot-menu.png`
+- Menú principal con selección de modalidades: `documentacion/capturas/menu.png`
 - *(Pendiente: capturas de la partida en acción y del panel de telemetría.)*
 
 ## Documentación y defensa
 
-- Documento técnico (3–5 pág.): descripción, diagrama de arquitectura, diagrama de la BD y puntos de acceso de la API.
+- Documento técnico (3–5 pág.): `documentacion/documento-tecnico.md` — descripción, diagrama de arquitectura, diagrama de la BD y puntos de acceso de la API.
+- Guion del video: `documentacion/guion-video.md`.
 - Video de 5–8 minutos explicando funcionamiento y estructura.
 - Defensa oral: cada integrante debe explicar cualquier parte del código.
 ```
