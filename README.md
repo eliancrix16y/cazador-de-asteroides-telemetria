@@ -37,6 +37,8 @@ No hace falta escribir comandos:
 
 Si no hay Node.js en el equipo, el iniciador lo avisa y muestra cómo instalarlo (https://nodejs.org).
 
+También puedes abrir `frontend/index.html` directamente (doble clic, sin servidor): el juego corre igual y solo el guardado de puntuaciones / leaderboard requiere el servidor activo. `frontend/src/js/app.js` es un *bundle* clásico generado desde los ES modules de `src/js` (`node scripts/bundle.js`); no se edita a mano.
+
 ## Instalación y ejecución
 
 1. Descargar y descomprimir el proyecto (o clonar el repositorio).
@@ -97,10 +99,12 @@ proyecto combinado/
 │       └── utils/              # Respuestas JSON uniformes
 ├── frontend/
 │   ├── index.html
+│   ├── scripts/                # Generador del bundle (node scripts/bundle.js)
 │   └── src/
 │       ├── css/                # Estilos separados, responsivos
 │       ├── js/
 │       │   ├── main.js         # Punto de entrada: solo orquesta
+│       │   ├── app.js          # Bundle clásico generado desde los ES modules
 │       │   ├── engine/         # Bucle, tiempo, render, colisiones
 │       │   ├── entities/       # Player, Bullet, Asteroid, Particle
 │       │   ├── input/          # Teclado y táctil aislados
