@@ -20,6 +20,29 @@ export const FRAGMENT_MIN_SPEED = 50;
 export const FRAGMENT_MAX_SPEED = 110;
 
 export const STARTING_LIVES = 3;
+export const GAME_MODES = Object.freeze({
+  classic: {
+    label: "Clasico",
+    lives: 3,
+    timeout: null,
+    speedBonus: 0,
+    description: "Oleadas progresivas · 3 naves",
+  },
+  blitz: {
+    label: "Velocidad",
+    lives: Infinity,
+    timeout: 45,
+    speedBonus: 0,
+    description: "45 segundos para el maximo puntaje",
+  },
+  survival: {
+    label: "Supervivencia",
+    lives: 1,
+    timeout: null,
+    speedBonus: 25,
+    description: "Oleadas rapidas e infinitas · 1 nave",
+  },
+});
 export const INVINCIBLE_TIME = 2.2;
 export const BASE_WAVE_SIZE = 3;
 export const WAVE_MIN_SPEED = 30;

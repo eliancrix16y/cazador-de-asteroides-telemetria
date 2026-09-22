@@ -9,6 +9,7 @@ import {
   WORLD_HEIGHT,
   COLOR_PLAYER,
   COLOR_THRUST,
+  COLOR_BULLET,
   BLINK_INTERVAL_MS,
 } from "../constants.js";
 
@@ -56,26 +57,47 @@ export class Player {
     context.translate(this.position.x, this.position.y);
     context.rotate(this.angle);
     context.globalAlpha = this.getAlpha();
+    if (this.accelerating) this.renderThrust(context);
     context.beginPath();
-    context.moveTo(14, 0);
-    context.lineTo(-10, 8);
-    context.lineTo(-6, 0);
-    context.lineTo(-10, -8);
+    context.moveTo(16, 0);
+    context.lineTo(-9, 9);
+    context.lineTo(-5, 3);
+    context.lineTo(-5, -3);
+    context.lineTo(-9, -9);
     context.closePath();
     context.strokeStyle = COLOR_PLAYER;
     context.lineWidth = 1.6;
     context.stroke();
-    if (this.accelerating) this.renderThrust(context);
+    context.beginPath();
+    context.moveTo(16, 0);
+    context.lineTo(-4, 2.6);
+    context.lineTo(-4, -2.6);
+    context.closePath();
+    context.fillStyle = "rgba(237, 234, 228, 0.16)";
+    context.fill();
+    context.beginPath();
+    context.arc(3, 0, 2.7, 0, Math.PI * 2);
+    context.fillStyle = COLOR_BULLET;
+    context.fill();
     context.restore();
     context.globalAlpha = 1;
   }
 
   renderThrust(context) {
     context.beginPath();
-    context.moveTo(-6, 0);
-    context.lineTo(-16 - Math.random() * 6, 0);
-    context.strokeStyle = COLOR_THRUST;
-    context.stroke();
+    context.moveTo(-5.5, 4.5);
+    context.lineTo(-17 - Math.random() * 7, 0);
+    context.lineTo(-5.5, -4.5);
+    context.closePath();
+    context.fillStyle = COLOR_THRUST;
+    context.fill();
+    context.beginPath();
+    context.moveTo(-5, 2.6);
+    context.lineTo(-11 - Math.random() * 4, 0);
+    context.lineTo(-5, -2.6);
+    context.closePath();
+    context.fillStyle = "#ffd37a";
+    context.fill();
   }
 
   getAlpha() {

@@ -41,10 +41,32 @@ export class Asteroid {
     context.rotate(this.angle);
     context.beginPath();
     this.traceShape(context);
+    context.fillStyle = "rgba(139, 143, 153, 0.08)";
+    context.fill();
     context.strokeStyle = COLOR_ASTEROID;
     context.lineWidth = 1.4;
     context.stroke();
+    context.beginPath();
+    this.traceInnerShape(context);
+    context.globalAlpha = 0.4;
+    context.lineWidth = 1;
+    context.stroke();
     context.restore();
+  }
+
+  traceInnerShape(context) {
+    let first = true;
+    for (const vertex of this.vertices) {
+      const x = Math.cos(vertex.angle) * (vertex.radius * 0.55 + 1.5) + 1.4;
+      const y = Math.sin(vertex.angle) * (vertex.radius * 0.55 - 0.8);
+      if (first) {
+        context.moveTo(x, y);
+        first = false;
+      } else {
+        context.lineTo(x, y);
+      }
+    }
+    context.closePath();
   }
 
   traceShape(context) {

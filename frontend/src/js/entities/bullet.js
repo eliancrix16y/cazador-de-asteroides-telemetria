@@ -23,8 +23,18 @@ export class Bullet {
 
   render(context) {
     context.beginPath();
-    context.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
+    context.arc(this.position.x, this.position.y, this.radius * 3, 0, Math.PI * 2);
     context.fillStyle = COLOR_BULLET;
+    context.globalAlpha = 0.18;
+    context.fill();
+    context.globalAlpha = 0.45;
+    context.beginPath();
+    context.arc(this.position.x, this.position.y, this.radius * 1.5, 0, Math.PI * 2);
+    context.fill();
+    context.globalAlpha = 1;
+    context.fillStyle = "#eafffb";
+    context.beginPath();
+    context.arc(this.position.x, this.position.y, this.radius * 0.8, 0, Math.PI * 2);
     context.fill();
   }
 }

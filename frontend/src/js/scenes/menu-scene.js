@@ -1,5 +1,5 @@
 import { getElement } from "../utils/dom-utils.js";
-import { DEFAULT_PLAYER_NAME } from "../constants.js";
+import { DEFAULT_PLAYER_NAME, GAME_MODES } from "../constants.js";
 
 export class MenuScene {
   constructor(runner, keyInput, leaderboardService, telemetry, apiState) {
@@ -12,7 +12,36 @@ export class MenuScene {
     this.nameInput = getElement("player-name");
     this.startButton = getElement("btn-start");
     this.leaderboardList = getElement("leaderboard-list");
+    this.selectedMode = "classic";
+    this.modeButtons = new Map();
+    const modeSelect = getElement("mode-select");
+    for (const card of modeSelect.querySelectorAll("button[data-mode]")) {
+      this.modeButtons.set(card.dataset.mode, card);
+      this.renderModeCard(card, card.dataset.mode);
+      card.addEventListener("click", () => this.selectMode(card.dataset.mode));
+    }
     this.startButton.addEventListener("click", () => this.startGame());
+    this.applySelection();
+  }
+
+  selectMode(mode) {
+    this.selectedMode = mode;
+    this.applySelection();
+  }
+
+  applySelection() {
+    for (const [mode, card] of this.modeButtons) {
+      card.classList.toggle("selected", mode === this.selectedMode);
+    }
+  }
+
+  renderModeCard(card, mode) {
+    const config = GAME_MODES[mode];
+    if (!config) return;
+    const title = card.querySelector(".mode-title");
+    const desc = card.querySelector(".mode-desc");
+    if (title) title.textContent = config.label;
+    if (desc) desc.textContent = config.description;
   }
 
   enter() {
@@ -33,7 +62,7 @@ export class MenuScene {
 
   startGame() {
     const playerName = this.nameInput.value.trim() || DEFAULT_PLAYER_NAME;
-    this.runner.changeScene("play", { playerName, fresh: true });
+    this.runner.changeScene("play", { playerName, fresh: true, mode: this.selectedMode });
   }
 
   async loadLeaderboard() {

@@ -12,6 +12,8 @@ export class GameOverScene {
     this.summary = getElement("game-over-summary");
     this.retryButton = getElement("btn-retry");
     this.retryButton.addEventListener("click", () => this.retry());
+    this.menuButton = getElement("btn-menu");
+    this.menuButton.addEventListener("click", () => this.toMenu());
   }
 
   enter() {
@@ -35,11 +37,15 @@ export class GameOverScene {
     this.runner.changeScene("play", { playerName: this.context.playerName, fresh: true });
   }
 
+  toMenu() {
+    this.runner.changeScene("menu", {});
+  }
+
   renderSummary() {
     const final = this.context.final;
     this.summary.textContent =
-      `${this.context.playerName} — puntaje ${final.score}, oleada ${final.wave}, ` +
-      `fps promedio ${final.fps}.`;
+      `${this.context.playerName} — modalidad ${this.context.getModeLabel()}, ` +
+      `puntaje ${final.score}, oleada ${final.wave}, fps promedio ${final.fps}.`;
   }
 
   saveScore() {

@@ -16,7 +16,9 @@ Combinación de un **videojuego de naves (Asteroids)** con un **contador de foto
 - **Contador de FPS propio**: el juego mide su propia tasa de fotogramas a partir de `requestAnimationFrame` (independiente de herramientas externas) y muestra *FPS actual, promedio, mínimo, máximo, tiempo de cuadro y total de cuadros*.
 - **Telemetría de colisiones**: se reportan por fotograma las *evaluaciones de colisión* realizadas y el *número de entidades activas*, conectando el rendimiento (FPS) con la carga de trabajo real del juego.
 - **Gráfica en vivo** del historial de FPS dentro de la sesión.
-- **Modos / escenas**: menú (con nombre del piloto), juego, pausa y fin de partida.
+- **Modalidades de juego**: el menú permite elegir entre **Clásico** (3 naves, oleadas progresivas), **Velocidad** (45 s para el máximo puntaje, sin perder naves, con temporizador en pantalla) y **Supervivencia** (oleadas más rápidas e infinitas, 1 sola nave).
+- **Escenas**: menú (con nombre del piloto y selección de modalidad), juego, pausa y **fin de partida** (resumen con modalidad; permite reintentar o volver al menú).
+- **Apartado visual**: fondo con campo de estrellas, nave con cabina y llama de propulsión animada, asteroides con relieve interior y balas con brillo.
 - **Controles**: teclado (W/A/S/D, flechas, espacio, P) y **controles táctiles** en pantalla para móviles.
 - **Backend de apoyo obligatorio**: API REST que guarda las puntuaciones en una **base de datos SQLite** y expone una **tabla de mejores pilotos (leaderboard)**.
 
@@ -143,14 +145,8 @@ La validación de entrada exige nombre de 1 a 16 caracteres, `score`/`waveReache
 
 ## Capturas de pantalla
 
-<!--
-  Reemplazar por capturas reales antes de la entrega:
-  - assets/capturas/menu.png
-  - assets/capturas/partida.png
-  - assets/capturas/panel-telemetria.png
--->
-
-*(Pendiente: agregar las capturas de la aplicación en funcionamiento.)*
+- Menú principal con selección de modalidades: `frontend/screenshot-menu.png`
+- *(Pendiente: capturas de la partida en acción y del panel de telemetría.)*
 
 ## Documentación y defensa
 

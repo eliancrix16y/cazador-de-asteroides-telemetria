@@ -13,11 +13,11 @@ import {
   FRAGMENT_MAX_SPEED,
 } from "../constants.js";
 
-export function createWaveAsteroids(waveNumber) {
+export function createWaveAsteroids(waveNumber, speedBonus = 0) {
   const count = BASE_WAVE_SIZE + waveNumber;
   const asteroids = [];
   for (let index = 0; index < count; index++) {
-    asteroids.push(createEdgeAsteroid(waveNumber));
+    asteroids.push(createEdgeAsteroid(waveNumber, speedBonus));
   }
   return asteroids;
 }
@@ -30,8 +30,12 @@ export function createFragmentAsteroid(position, size) {
   );
 }
 
-function createEdgeAsteroid(waveNumber) {
-  const speed = WAVE_MIN_SPEED + Math.random() * WAVE_SPEED_RANDOM + waveNumber * WAVE_SPEED_PER_LEVEL;
+function createEdgeAsteroid(waveNumber, speedBonus) {
+  const speed =
+    WAVE_MIN_SPEED +
+    Math.random() * WAVE_SPEED_RANDOM +
+    waveNumber * WAVE_SPEED_PER_LEVEL +
+    speedBonus;
   return createAsteroidWithSpeed(pickEdgePosition(), speed, "large");
 }
 

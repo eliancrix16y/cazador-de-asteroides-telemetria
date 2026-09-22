@@ -7,12 +7,12 @@ import { ShooterInput } from "../input/shooter-input.js";
 import { hitAsteroidsByBullets, findShipCollision } from "../engine/collisions.js";
 import { createWaveAsteroids, createFragmentAsteroid } from "../modules/wave-spawner.js";
 import {
-  STARTING_LIVES,
   INVINCIBLE_TIME,
   WORLD_WIDTH,
   WORLD_HEIGHT,
   ASTEROID_SCORE,
   FRAGMENTS_ON_BREAK,
+  GAME_MODES,
   COLOR_ASTEROID,
   COLOR_HIT,
 } from "../constants.js";
@@ -30,10 +30,15 @@ export class PlayScene {
     this.scoreEl = getElement("hud-score");
     this.livesEl = getElement("hud-lives");
     this.waveEl = getElement("hud-wave");
+    this.timerBlock = getElement("hud-timer");
+    this.timeEl = getElement("hud-time");
+    this.modeConfig = GAME_MODES.classic;
     this.started = false;
   }
 
   enter(payload) {
+    if (payload?.mode) this.context.mode = payload.mode;
+    this.modeConfig = this.context.getModeConfig();
     if (!this.started || payload?.fresh) {
       this.reset();
       this.monitor.reset();
@@ -53,9 +58,10 @@ export class PlayScene {
     this.asteroids = [];
     this.particles = [];
     this.score = 0;
-    this.lives = STARTING_LIVES;
+    this.lives = this.modeConfig.lives;
+    this.timeLeft = this.modeConfig.timeout;
     this.wave = 1;
-    this.asteroids.push(...createWaveAsteroids(this.wave));
+    this.asteroids.push(...createWaveAsteroids(this.wave, this.modeConfig.speedBonus));
     this.syncHud();
   }
 
@@ -67,6 +73,7 @@ export class PlayScene {
     this.updateParticles(deltaSeconds);
     this.detectCollisions();
     this.checkWaveCompletion();
+    this.checkTimeLimit(deltaSeconds);
     this.reportTelemetry(fps);
     this.keys.consumePresses();
   }
@@ -151,8 +158,15 @@ export class PlayScene {
   checkWaveCompletion() {
     if (this.asteroids.length > 0) return;
     this.wave += 1;
-    this.asteroids.push(...createWaveAsteroids(this.wave));
+    this.asteroids.push(...createWaveAsteroids(this.wave, this.modeConfig.speedBonus));
     this.syncHud();
+  }
+
+  checkTimeLimit(deltaSeconds) {
+    if (this.modeConfig.timeout === null) return;
+    this.timeLeft = Math.max(0, this.timeLeft - deltaSeconds);
+    this.syncHud();
+    if (this.timeLeft <= 0) this.finishGame();
   }
 
   spawnParticles(position, quantity, color) {
@@ -177,8 +191,14 @@ export class PlayScene {
 
   syncHud() {
     this.scoreEl.textContent = this.score;
-    this.livesEl.textContent = Math.max(this.lives, 0);
+    this.livesEl.textContent = Number.isFinite(this.lives) ? Math.max(this.lives, 0) : "\u221E";
     this.waveEl.textContent = this.wave;
+    if (this.modeConfig.timeout === null) {
+      this.timerBlock.classList.add("hidden");
+    } else {
+      this.timerBlock.classList.remove("hidden");
+      this.timeEl.textContent = Math.ceil(this.timeLeft);
+    }
   }
 
   render() {

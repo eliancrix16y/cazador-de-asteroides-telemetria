@@ -35,6 +35,7 @@
           <div id="hud-score" class="hud-score">0</div>
           <div>VIDAS <span id="hud-lives">3</span></div>
           <div>OLEADA <span id="hud-wave">1</span></div>
+          <div id="hud-timer" class="hidden">TEMPO <span id="hud-time">--</span></div>
         </div>
 
         <div id="scene-menu" class="overlay">
@@ -43,6 +44,20 @@
             <span>Nombre del piloto</span>
             <input id="player-name" type="text" maxlength="16" placeholder="Jugador" />
           </label>
+          <div class="modes" id="mode-select">
+            <button id="btn-mode-classic" class="mode-card" data-mode="classic">
+              <span class="mode-title"></span>
+              <span class="mode-desc"></span>
+            </button>
+            <button id="btn-mode-blitz" class="mode-card" data-mode="blitz">
+              <span class="mode-title"></span>
+              <span class="mode-desc"></span>
+            </button>
+            <button id="btn-mode-survival" class="mode-card" data-mode="survival">
+              <span class="mode-title"></span>
+              <span class="mode-desc"></span>
+            </button>
+          </div>
           <button id="btn-start" class="accent">Comenzar partida</button>
         </div>
 
@@ -55,6 +70,7 @@
           <h2>Nave destruida</h2>
           <p id="game-over-summary"></p>
           <button id="btn-retry" class="accent">Jugar de nuevo</button>
+          <button id="btn-menu" class="secondary">Volver al menú</button>
         </div>
 
         <div id="touch-controls" class="touch-controls">

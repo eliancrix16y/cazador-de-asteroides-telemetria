@@ -32,6 +32,29 @@ const FRAGMENT_MIN_SPEED = 50;
 const FRAGMENT_MAX_SPEED = 110;
 
 const STARTING_LIVES = 3;
+const GAME_MODES = Object.freeze({
+  classic: {
+    label: "Clasico",
+    lives: 3,
+    timeout: null,
+    speedBonus: 0,
+    description: "Oleadas progresivas · 3 naves",
+  },
+  blitz: {
+    label: "Velocidad",
+    lives: Infinity,
+    timeout: 45,
+    speedBonus: 0,
+    description: "45 segundos para el maximo puntaje",
+  },
+  survival: {
+    label: "Supervivencia",
+    lives: 1,
+    timeout: null,
+    speedBonus: 25,
+    description: "Oleadas rapidas e infinitas · 1 nave",
+  },
+});
 const INVINCIBLE_TIME = 2.2;
 const BASE_WAVE_SIZE = 3;
 const WAVE_MIN_SPEED = 30;
@@ -59,21 +82,49 @@ const COLOR_BULLET = "#2bb7a9";
 const COLOR_PLAYER = "#edeae4";
 const COLOR_THRUST = "#e8a33d";
 const COLOR_HIT = "#d9524f";
-  module.exports = { WORLD_WIDTH, WORLD_HEIGHT, PLAYER_TURN_RATE, PLAYER_ACCELERATION, PLAYER_FRICTION, PLAYER_MAX_SPEED, PLAYER_RADIUS, SHOOT_COOLDOWN, BULLET_SPEED, BULLET_RADIUS, BULLET_LIFETIME, ASTEROID_SIDES, ASTEROID_RADIUS, ASTEROID_SCORE, FRAGMENTS_ON_BREAK, FRAGMENT_MIN_SPEED, FRAGMENT_MAX_SPEED, STARTING_LIVES, INVINCIBLE_TIME, BASE_WAVE_SIZE, WAVE_MIN_SPEED, WAVE_SPEED_RANDOM, WAVE_SPEED_PER_LEVEL, SPAWN_MARGIN, PARTICLE_LIFETIME, PARTICLE_MIN_SPEED, PARTICLE_MAX_SPEED, MAX_DELTA_SECONDS, BLINK_INTERVAL_MS, FPS_GRAPH_CAP, FPS_SMOOTH_THRESHOLD, FPS_REGULAR_THRESHOLD, FPS_HISTORY_LIMIT, DEFAULT_PLAYER_NAME, COLOR_BACKGROUND, COLOR_ASTEROID, COLOR_BULLET, COLOR_PLAYER, COLOR_THRUST, COLOR_HIT };
+  module.exports = { WORLD_WIDTH, WORLD_HEIGHT, PLAYER_TURN_RATE, PLAYER_ACCELERATION, PLAYER_FRICTION, PLAYER_MAX_SPEED, PLAYER_RADIUS, SHOOT_COOLDOWN, BULLET_SPEED, BULLET_RADIUS, BULLET_LIFETIME, ASTEROID_SIDES, ASTEROID_RADIUS, ASTEROID_SCORE, FRAGMENTS_ON_BREAK, FRAGMENT_MIN_SPEED, FRAGMENT_MAX_SPEED, STARTING_LIVES, GAME_MODES, INVINCIBLE_TIME, BASE_WAVE_SIZE, WAVE_MIN_SPEED, WAVE_SPEED_RANDOM, WAVE_SPEED_PER_LEVEL, SPAWN_MARGIN, PARTICLE_LIFETIME, PARTICLE_MIN_SPEED, PARTICLE_MAX_SPEED, MAX_DELTA_SECONDS, BLINK_INTERVAL_MS, FPS_GRAPH_CAP, FPS_SMOOTH_THRESHOLD, FPS_REGULAR_THRESHOLD, FPS_HISTORY_LIMIT, DEFAULT_PLAYER_NAME, COLOR_BACKGROUND, COLOR_ASTEROID, COLOR_BULLET, COLOR_PLAYER, COLOR_THRUST, COLOR_HIT };
 
   };
   __modules["engine/renderer.js"] = function (exports, module, __require) {
 const { WORLD_WIDTH, WORLD_HEIGHT, COLOR_BACKGROUND } = __require("constants.js");
 
+const STAR_COUNT = 120;
+
 class Renderer {
   constructor(canvas) {
     this.canvas = canvas;
     this.context = canvas.getContext("2d");
+    this.stars = this.buildStars();
+  }
+
+  buildStars() {
+    const stars = [];
+    for (let index = 0; index < STAR_COUNT; index++) {
+      stars.push({
+        x: Math.random() * WORLD_WIDTH,
+        y: Math.random() * WORLD_HEIGHT,
+        size: 0.6 + Math.random() * 0.9,
+        alpha: 0.18 + Math.random() * 0.45,
+        phase: Math.random() * Math.PI * 2,
+      });
+    }
+    return stars;
   }
 
   clear() {
-    this.context.fillStyle = COLOR_BACKGROUND;
-    this.context.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+    const context = this.context;
+    context.fillStyle = COLOR_BACKGROUND;
+    context.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+    this.drawStars(context);
+  }
+
+  drawStars(context) {
+    const now = performance.now();
+    for (const star of this.stars) {
+      const twinkle = 0.7 + 0.3 * Math.sin(now / 500 + star.phase);
+      context.fillStyle = `rgba(255, 255, 255, ${(star.alpha * twinkle).toFixed(3)})`;
+      context.fillRect(star.x, star.y, star.size, star.size);
+    }
   }
 }
   module.exports = { Renderer };
@@ -341,7 +392,9 @@ class SceneRunner {
   changeScene(name, payload = null) {
     const nextScene = this.scenes.get(name);
     if (!nextScene) return;
-    if (this.currentScene) this.currentScene.exit();
+    if (this.currentScene && typeof this.currentScene.exit === "function") {
+      this.currentScene.exit();
+    }
     this.payload = payload;
     nextScene.enter(payload);
     this.currentScene = nextScene;
@@ -362,7 +415,7 @@ class SceneRunner {
   };
   __modules["scenes/menu-scene.js"] = function (exports, module, __require) {
 const { getElement } = __require("utils/dom-utils.js");
-const { DEFAULT_PLAYER_NAME } = __require("constants.js");
+const { DEFAULT_PLAYER_NAME, GAME_MODES } = __require("constants.js");
 
 class MenuScene {
   constructor(runner, keyInput, leaderboardService, telemetry, apiState) {
@@ -375,7 +428,36 @@ class MenuScene {
     this.nameInput = getElement("player-name");
     this.startButton = getElement("btn-start");
     this.leaderboardList = getElement("leaderboard-list");
+    this.selectedMode = "classic";
+    this.modeButtons = new Map();
+    const modeSelect = getElement("mode-select");
+    for (const card of modeSelect.querySelectorAll("button[data-mode]")) {
+      this.modeButtons.set(card.dataset.mode, card);
+      this.renderModeCard(card, card.dataset.mode);
+      card.addEventListener("click", () => this.selectMode(card.dataset.mode));
+    }
     this.startButton.addEventListener("click", () => this.startGame());
+    this.applySelection();
+  }
+
+  selectMode(mode) {
+    this.selectedMode = mode;
+    this.applySelection();
+  }
+
+  applySelection() {
+    for (const [mode, card] of this.modeButtons) {
+      card.classList.toggle("selected", mode === this.selectedMode);
+    }
+  }
+
+  renderModeCard(card, mode) {
+    const config = GAME_MODES[mode];
+    if (!config) return;
+    const title = card.querySelector(".mode-title");
+    const desc = card.querySelector(".mode-desc");
+    if (title) title.textContent = config.label;
+    if (desc) desc.textContent = config.description;
   }
 
   enter() {
@@ -396,7 +478,7 @@ class MenuScene {
 
   startGame() {
     const playerName = this.nameInput.value.trim() || DEFAULT_PLAYER_NAME;
-    this.runner.changeScene("play", { playerName, fresh: true });
+    this.runner.changeScene("play", { playerName, fresh: true, mode: this.selectedMode });
   }
 
   async loadLeaderboard() {
@@ -500,7 +582,7 @@ function wrapAxis(value, size) {
   __modules["entities/player.js"] = function (exports, module, __require) {
 const { Vector2 } = __require("utils/vector2.js");
 const { wrapPosition } = __require("utils/math-utils.js");
-const { PLAYER_TURN_RATE, PLAYER_ACCELERATION, PLAYER_FRICTION, PLAYER_MAX_SPEED, WORLD_WIDTH, WORLD_HEIGHT, COLOR_PLAYER, COLOR_THRUST, BLINK_INTERVAL_MS } = __require("constants.js");
+const { PLAYER_TURN_RATE, PLAYER_ACCELERATION, PLAYER_FRICTION, PLAYER_MAX_SPEED, WORLD_WIDTH, WORLD_HEIGHT, COLOR_PLAYER, COLOR_THRUST, COLOR_BULLET, BLINK_INTERVAL_MS } = __require("constants.js");
 
 class Player {
   constructor() {
@@ -546,26 +628,47 @@ class Player {
     context.translate(this.position.x, this.position.y);
     context.rotate(this.angle);
     context.globalAlpha = this.getAlpha();
+    if (this.accelerating) this.renderThrust(context);
     context.beginPath();
-    context.moveTo(14, 0);
-    context.lineTo(-10, 8);
-    context.lineTo(-6, 0);
-    context.lineTo(-10, -8);
+    context.moveTo(16, 0);
+    context.lineTo(-9, 9);
+    context.lineTo(-5, 3);
+    context.lineTo(-5, -3);
+    context.lineTo(-9, -9);
     context.closePath();
     context.strokeStyle = COLOR_PLAYER;
     context.lineWidth = 1.6;
     context.stroke();
-    if (this.accelerating) this.renderThrust(context);
+    context.beginPath();
+    context.moveTo(16, 0);
+    context.lineTo(-4, 2.6);
+    context.lineTo(-4, -2.6);
+    context.closePath();
+    context.fillStyle = "rgba(237, 234, 228, 0.16)";
+    context.fill();
+    context.beginPath();
+    context.arc(3, 0, 2.7, 0, Math.PI * 2);
+    context.fillStyle = COLOR_BULLET;
+    context.fill();
     context.restore();
     context.globalAlpha = 1;
   }
 
   renderThrust(context) {
     context.beginPath();
-    context.moveTo(-6, 0);
-    context.lineTo(-16 - Math.random() * 6, 0);
-    context.strokeStyle = COLOR_THRUST;
-    context.stroke();
+    context.moveTo(-5.5, 4.5);
+    context.lineTo(-17 - Math.random() * 7, 0);
+    context.lineTo(-5.5, -4.5);
+    context.closePath();
+    context.fillStyle = COLOR_THRUST;
+    context.fill();
+    context.beginPath();
+    context.moveTo(-5, 2.6);
+    context.lineTo(-11 - Math.random() * 4, 0);
+    context.lineTo(-5, -2.6);
+    context.closePath();
+    context.fillStyle = "#ffd37a";
+    context.fill();
   }
 
   getAlpha() {
@@ -602,8 +705,18 @@ class Bullet {
 
   render(context) {
     context.beginPath();
-    context.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
+    context.arc(this.position.x, this.position.y, this.radius * 3, 0, Math.PI * 2);
     context.fillStyle = COLOR_BULLET;
+    context.globalAlpha = 0.18;
+    context.fill();
+    context.globalAlpha = 0.45;
+    context.beginPath();
+    context.arc(this.position.x, this.position.y, this.radius * 1.5, 0, Math.PI * 2);
+    context.fill();
+    context.globalAlpha = 1;
+    context.fillStyle = "#eafffb";
+    context.beginPath();
+    context.arc(this.position.x, this.position.y, this.radius * 0.8, 0, Math.PI * 2);
     context.fill();
   }
 }
@@ -767,10 +880,32 @@ class Asteroid {
     context.rotate(this.angle);
     context.beginPath();
     this.traceShape(context);
+    context.fillStyle = "rgba(139, 143, 153, 0.08)";
+    context.fill();
     context.strokeStyle = COLOR_ASTEROID;
     context.lineWidth = 1.4;
     context.stroke();
+    context.beginPath();
+    this.traceInnerShape(context);
+    context.globalAlpha = 0.4;
+    context.lineWidth = 1;
+    context.stroke();
     context.restore();
+  }
+
+  traceInnerShape(context) {
+    let first = true;
+    for (const vertex of this.vertices) {
+      const x = Math.cos(vertex.angle) * (vertex.radius * 0.55 + 1.5) + 1.4;
+      const y = Math.sin(vertex.angle) * (vertex.radius * 0.55 - 0.8);
+      if (first) {
+        context.moveTo(x, y);
+        first = false;
+      } else {
+        context.lineTo(x, y);
+      }
+    }
+    context.closePath();
   }
 
   traceShape(context) {
@@ -797,11 +932,11 @@ const { Vector2 } = __require("utils/vector2.js");
 const { randomAngle, randomRange } = __require("utils/math-utils.js");
 const { WORLD_WIDTH, WORLD_HEIGHT, SPAWN_MARGIN, BASE_WAVE_SIZE, WAVE_MIN_SPEED, WAVE_SPEED_RANDOM, WAVE_SPEED_PER_LEVEL, FRAGMENT_MIN_SPEED, FRAGMENT_MAX_SPEED } = __require("constants.js");
 
-function createWaveAsteroids(waveNumber) {
+function createWaveAsteroids(waveNumber, speedBonus = 0) {
   const count = BASE_WAVE_SIZE + waveNumber;
   const asteroids = [];
   for (let index = 0; index < count; index++) {
-    asteroids.push(createEdgeAsteroid(waveNumber));
+    asteroids.push(createEdgeAsteroid(waveNumber, speedBonus));
   }
   return asteroids;
 }
@@ -814,8 +949,12 @@ function createFragmentAsteroid(position, size) {
   );
 }
 
-function createEdgeAsteroid(waveNumber) {
-  const speed = WAVE_MIN_SPEED + Math.random() * WAVE_SPEED_RANDOM + waveNumber * WAVE_SPEED_PER_LEVEL;
+function createEdgeAsteroid(waveNumber, speedBonus) {
+  const speed =
+    WAVE_MIN_SPEED +
+    Math.random() * WAVE_SPEED_RANDOM +
+    waveNumber * WAVE_SPEED_PER_LEVEL +
+    speedBonus;
   return createAsteroidWithSpeed(pickEdgePosition(), speed, "large");
 }
 
@@ -844,7 +983,7 @@ const { getElement } = __require("utils/dom-utils.js");
 const { ShooterInput } = __require("input/shooter-input.js");
 const { hitAsteroidsByBullets, findShipCollision } = __require("engine/collisions.js");
 const { createWaveAsteroids, createFragmentAsteroid } = __require("modules/wave-spawner.js");
-const { STARTING_LIVES, INVINCIBLE_TIME, WORLD_WIDTH, WORLD_HEIGHT, ASTEROID_SCORE, FRAGMENTS_ON_BREAK, COLOR_ASTEROID, COLOR_HIT } = __require("constants.js");
+const { INVINCIBLE_TIME, WORLD_WIDTH, WORLD_HEIGHT, ASTEROID_SCORE, FRAGMENTS_ON_BREAK, GAME_MODES, COLOR_ASTEROID, COLOR_HIT } = __require("constants.js");
 
 class PlayScene {
   constructor(renderer, runner, keys, touch, telemetry, monitor, context) {
@@ -859,10 +998,15 @@ class PlayScene {
     this.scoreEl = getElement("hud-score");
     this.livesEl = getElement("hud-lives");
     this.waveEl = getElement("hud-wave");
+    this.timerBlock = getElement("hud-timer");
+    this.timeEl = getElement("hud-time");
+    this.modeConfig = GAME_MODES.classic;
     this.started = false;
   }
 
   enter(payload) {
+    if (payload?.mode) this.context.mode = payload.mode;
+    this.modeConfig = this.context.getModeConfig();
     if (!this.started || payload?.fresh) {
       this.reset();
       this.monitor.reset();
@@ -872,15 +1016,20 @@ class PlayScene {
     this.keys.consumePresses();
   }
 
+  exit() {
+    this.keys.consumePresses();
+  }
+
   reset() {
     this.player = new Player();
     this.bullets = [];
     this.asteroids = [];
     this.particles = [];
     this.score = 0;
-    this.lives = STARTING_LIVES;
+    this.lives = this.modeConfig.lives;
+    this.timeLeft = this.modeConfig.timeout;
     this.wave = 1;
-    this.asteroids.push(...createWaveAsteroids(this.wave));
+    this.asteroids.push(...createWaveAsteroids(this.wave, this.modeConfig.speedBonus));
     this.syncHud();
   }
 
@@ -892,6 +1041,7 @@ class PlayScene {
     this.updateParticles(deltaSeconds);
     this.detectCollisions();
     this.checkWaveCompletion();
+    this.checkTimeLimit(deltaSeconds);
     this.reportTelemetry(fps);
     this.keys.consumePresses();
   }
@@ -976,8 +1126,15 @@ class PlayScene {
   checkWaveCompletion() {
     if (this.asteroids.length > 0) return;
     this.wave += 1;
-    this.asteroids.push(...createWaveAsteroids(this.wave));
+    this.asteroids.push(...createWaveAsteroids(this.wave, this.modeConfig.speedBonus));
     this.syncHud();
+  }
+
+  checkTimeLimit(deltaSeconds) {
+    if (this.modeConfig.timeout === null) return;
+    this.timeLeft = Math.max(0, this.timeLeft - deltaSeconds);
+    this.syncHud();
+    if (this.timeLeft <= 0) this.finishGame();
   }
 
   spawnParticles(position, quantity, color) {
@@ -1002,8 +1159,14 @@ class PlayScene {
 
   syncHud() {
     this.scoreEl.textContent = this.score;
-    this.livesEl.textContent = Math.max(this.lives, 0);
+    this.livesEl.textContent = Number.isFinite(this.lives) ? Math.max(this.lives, 0) : "\u221E";
     this.waveEl.textContent = this.wave;
+    if (this.modeConfig.timeout === null) {
+      this.timerBlock.classList.add("hidden");
+    } else {
+      this.timerBlock.classList.remove("hidden");
+      this.timeEl.textContent = Math.ceil(this.timeLeft);
+    }
   }
 
   render() {
@@ -1066,6 +1229,8 @@ class GameOverScene {
     this.summary = getElement("game-over-summary");
     this.retryButton = getElement("btn-retry");
     this.retryButton.addEventListener("click", () => this.retry());
+    this.menuButton = getElement("btn-menu");
+    this.menuButton.addEventListener("click", () => this.toMenu());
   }
 
   enter() {
@@ -1089,11 +1254,15 @@ class GameOverScene {
     this.runner.changeScene("play", { playerName: this.context.playerName, fresh: true });
   }
 
+  toMenu() {
+    this.runner.changeScene("menu", {});
+  }
+
   renderSummary() {
     const final = this.context.final;
     this.summary.textContent =
-      `${this.context.playerName} — puntaje ${final.score}, oleada ${final.wave}, ` +
-      `fps promedio ${final.fps}.`;
+      `${this.context.playerName} — modalidad ${this.context.getModeLabel()}, ` +
+      `puntaje ${final.score}, oleada ${final.wave}, fps promedio ${final.fps}.`;
   }
 
   saveScore() {
@@ -1270,16 +1439,25 @@ class ApiState {
 
   };
   __modules["modules/game-context.js"] = function (exports, module, __require) {
-const { DEFAULT_PLAYER_NAME } = __require("constants.js");
+const { DEFAULT_PLAYER_NAME, GAME_MODES } = __require("constants.js");
 
 class GameContext {
   constructor() {
     this.playerName = DEFAULT_PLAYER_NAME;
+    this.mode = "classic";
     this.final = { score: 0, wave: 1, fps: 0 };
   }
 
   setFinal(score, wave, fps) {
     this.final = { score, wave, fps };
+  }
+
+  getModeConfig() {
+    return GAME_MODES[this.mode] || GAME_MODES.classic;
+  }
+
+  getModeLabel() {
+    return this.getModeConfig().label;
   }
 }
   module.exports = { GameContext };
