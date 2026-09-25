@@ -150,7 +150,8 @@ La validación de entrada exige nombre de 1 a 16 caracteres, `score`/`waveReache
 ## Capturas de pantalla
 
 - Menú principal con selección de modalidades: `documentacion/capturas/menu.png`
-- *(Pendiente: capturas de la partida en acción y del panel de telemetría.)*
+- Partida en acción: `documentacion/capturas/partida.png`
+- Panel de telemetría en vivo: `documentacion/capturas/telemetria.png`
 
 ## Documentación y defensa
 
@@ -158,4 +159,5 @@ La validación de entrada exige nombre de 1 a 16 caracteres, `score`/`waveReache
 - Guion del video: `documentacion/guion-video.md`.
 - Video de 5–8 minutos explicando funcionamiento y estructura.
 - Defensa oral: cada integrante debe explicar cualquier parte del código.
+- **Repositorio público (buscable)**: https://github.com/eliancrix16y/cazador-de-asteroides-telemetria — con los 6 commits de la historia y temas de búsqueda (`game`, `javascript`, `canvas`, `nodejs`, `sqlite`, `telemetria`).
 ```

@@ -24,6 +24,9 @@ npm-debug.log*
 Thumbs.db
 *.tmp
 
+# Videos (grabaciones grandes, fuera del control de versiones)
+*.mp4
+
 # Node portatil empaquetado y PID del servidor
 tools/
 backend/server.pid
