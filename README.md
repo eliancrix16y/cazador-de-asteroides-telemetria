@@ -7,7 +7,7 @@ Combinación de un **videojuego de naves (Asteroids)** con un **contador de foto
 
 | Nombre | Matrícula / Grupo |
 | ------ | ----------------- |
-| *Elian* | *[por completar]* |
+| *Elian Gabriel Perez Castro* | *[por completar]* |
 | *[Ingresar segundo integrante]* | *[por completar]* |
 
 ## Descripción funcional
